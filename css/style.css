@@ -1,0 +1,34 @@
+:root {
+    font-size: 18px;
+}
+
+.container-fluid {
+    margin: 0 auto;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.headersection {
+    background: url(../images/background-homepage.jpg) no-repeat center;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+h1 {
+    color: #F5DEB3;
+}
+
+footer h3 {
+    font-size: 1.2rem;
+}
+
+.product img {
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+.basketamount__userinformations input {
+    border: none;
+}
