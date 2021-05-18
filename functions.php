@@ -1,5 +1,7 @@
 <?php
 
+$bdd = new PDO('mysql:host=localhost;dbname=boutique_en_ligne', 'jason', 'testtest');
+
 /* On crée nos produits */
 function myProducts()
 {
