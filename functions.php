@@ -1,6 +1,10 @@
 <?php
+try {
+    $bdd = new PDO('mysql:host=localhost;dbname=boutique_en_ligne', 'jason', 'testtest');
+} catch (Exception $error) {
+    die('Erreur : ' . $error->getMessage());
+}
 
-$bdd = new PDO('mysql:host=localhost;dbname=boutique_en_ligne', 'jason', 'testtest');
 
 /* On crée nos produits */
 function myProducts()
@@ -99,23 +103,23 @@ function singleProductPage($product)
 
     </header>
     <main class="productpage row mt-3" id="theproduct">
-    <section class="product productpage__photo col-md-6">
-        <img class="" src="images/<?= $product['photo'] ?>" alt="Ours en peluche en <?= $product['material'] ?>">
-    </section>
+        <section class="product productpage__photo col-md-6">
+            <img class="" src="images/<?= $product['photo'] ?>" alt="Ours en peluche en <?= $product['material'] ?>">
+        </section>
 
-    <section class="productpage__details col-md-6">
-        <h2 class="productpage__subtitle"><?= $product['name'] ?>, l'ours des <?= $product['location'] ?><br></h2>
-        <p class="productpage__price"><span>Prix</span><br><?= $product['price'] ?>€</p>
+        <section class="productpage__details col-md-6">
+            <h2 class="productpage__subtitle"><?= $product['name'] ?>, l'ours des <?= $product['location'] ?><br></h2>
+            <p class="productpage__price"><span>Prix</span><br><?= $product['price'] ?>€</p>
 
-        <p class="productpage__description"><span>Description</span><br><?= $product['completeDescription'] ?></p>
-        <p class="productpage__description"><span>Taille : </span><?= $product['height'] ?></p>
-        <p class="productpage__description"><span>Poids : </span><?= $product['weight'] ?></p>
-        <p class="productpage__description"><span>Texture : </span><?= $product['material'] ?></p>
-        <form class="col-md-5 product__cta" action="cart.php" method="POST">
-            <input type="hidden" name="productId" value="<?= $product['id'] ?>">
-            <input class="mt-3 btn btn-warning" type="submit" value="Je l'adopte">
-        </form>
-    </section>
+            <p class="productpage__description"><span>Description</span><br><?= $product['completeDescription'] ?></p>
+            <p class="productpage__description"><span>Taille : </span><?= $product['height'] ?></p>
+            <p class="productpage__description"><span>Poids : </span><?= $product['weight'] ?></p>
+            <p class="productpage__description"><span>Texture : </span><?= $product['material'] ?></p>
+            <form class="col-md-5 product__cta" action="cart.php" method="POST">
+                <input type="hidden" name="productId" value="<?= $product['id'] ?>">
+                <input class="mt-3 btn btn-warning" type="submit" value="Je l'adopte">
+            </form>
+        </section>
     </main>
     <?php }
 
