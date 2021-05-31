@@ -1,8 +1,38 @@
-<?php 
+<?php
 session_start();
 include('functions.php');
-if(!empty($_POST['reset'])) {
+if (!empty($_POST['reset'])) {
     deleteCart();
+}
+$queryproductlist1 = "SELECT * FROM articles WHERE id_gamme = 1 ORDER BY RAND() limit 1";
+$queryproductlist2 = "SELECT * FROM articles WHERE id_gamme = 2 ORDER BY RAND() limit 1";
+$queryproductlist3 = "SELECT * FROM articles WHERE id_gamme = 3 ORDER BY RAND() limit 1";
+
+try {
+    $result1 = $pdo->query($queryproductlist1);
+    $result2 = $pdo->query($queryproductlist2);
+    $result3 = $pdo->query($queryproductlist3);
+
+
+    if ($result1 === false) {
+        die("Erreur");
+    }
+} catch (PDOException $e) {
+    echo $e->getMessage();
+}
+
+$tableauarticles = array();
+
+while ($resultatsarticles = $result1->fetch(PDO::FETCH_ASSOC)) {
+    $tableauarticles[] = $resultatsarticles;
+}
+
+while ($resultatsarticles = $result2->fetch(PDO::FETCH_ASSOC)) {
+    $tableauarticles[] = $resultatsarticles;
+}
+
+while ($resultatsarticles = $result3->fetch(PDO::FETCH_ASSOC)) {
+    $tableauarticles[] = $resultatsarticles;
 }
 ?>
 
@@ -36,6 +66,8 @@ if(!empty($_POST['reset'])) {
                 </button>
                 <div class="col-md-9 collapse navbar-collapse d-flex justify-content-end" id="monMenu">
                     <ul class="navbar-nav d-flex justify-content-center align-items-center flex-row">
+                        <li><a class="nav-link" href="inscription.php">Inscription</a></li>
+                        <li><a class="nav-link" href="connexion.php">Connexion</a></li>
                         <li class="p-2 nav-item">
                             <a class="nav-link active" href="cart.php"><i class="navigation__icon fas fa-shopping-basket"></i>Panier</a>
                         </li>
@@ -53,7 +85,31 @@ if(!empty($_POST['reset'])) {
 
     <main class="container-fluid homepage mt-5 vh-100 d-flex align-items-center" id="main">
         <div class="row d-flex justify-content-around align-items-center">
-            <?php displayProducts(); ?>
+            <?php
+            while (count($tableauarticles) > 0) {
+                $product = array_shift($tableauarticles); ?>
+                <section class="product col-md-3 text-center shadow p-3 mb-5 bg-white rounded">
+
+                    <article class="product__nameandprice">
+                        <h2 class="product__title">Ours <?= $product['nom'] ?></h2>
+                        <p><?= $product['prix'] ?>€</p>
+                        <img src="images/<?= $product['image'] ?>" alt="Ours en peluche en coton">
+                        <p><?= $product['description'] ?></p>
+                        <div class="form__container row d-flex justify-content-center">
+                            <form class="col-md-7 product__cta" action="product.php" method="POST">
+                                <input type="hidden" name="productId" value="<?= $product['id'] ?>">
+                                <input class="mt-3 btn btn-warning" type="submit" value="Je le découvre">
+                            </form>
+                            <form class="col-md-5 product__cta" action="cart.php" method="POST">
+                                <input type="hidden" name="productId" value="<?= $product['id'] ?>">
+                                <input class="mt-3 btn btn-warning" type="submit" value="Je l'adopte">
+                            </form>
+                        </div>
+                    </article>
+
+                </section>
+            <?php } ?>
+
         </div>
     </main>
 

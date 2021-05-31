@@ -1,96 +1,13 @@
 <?php
-try {
-    $bdd = new PDO('mysql:host=localhost;dbname=boutique_en_ligne', 'jason', 'testtest');
-} catch (Exception $error) {
-    die('Erreur : ' . $error->getMessage());
-}
 
+/* Connexion à la BDD */
+$dsn = 'mysql:host=localhost;dbname=boutique_en_ligne';
+$user = 'jason';
+$password = 'testtest';
 
-/* On crée nos produits */
-function myProducts()
-{
-
-    $bear1 = [
-        'id' => 1,
-        'name' => 'John Lenonn',
-        'price' => 52.75,
-        'photo' => 'lennon.jpg',
-        'excerptDescription' => 'Tendre et doux',
-        'completeDescription' => 'Le nounours John Lennon convient aux petits – pas trop petits non plus – et aux grands. Et il est spécialement conçu pour répondre aux mêmes besoins que lorsque vous étiez enfant. Tendresse, écoute, discrétion. Telles sont les trois missions de cet ours en peluche géant. Comme avant, en somme. Un joli clin d\'œil, histoire de faire perdurer la tradition.',
-        'height' => 60,
-        'weight' => 220,
-        'material' => 'cotton',
-        'location' => 'Vosges',
-        'stock' => 28,
-    ];
-
-    $bear2 = [
-        'id' => 2,
-        'name' => 'Iron Maiden',
-        'price' => 49,
-        'photo' => 'maiden.jpg',
-        'excerptDescription' => 'Réconfortant et moelleux',
-        'completeDescription' => 'Le nounours Iron Maiden convient aux petits – pas trop petits non plus – et aux grands. Et il est spécialement conçu pour répondre aux mêmes besoins que lorsque vous étiez enfant. Tendresse, écoute, discrétion. Telles sont les trois missions de cet ours en peluche géant. Comme avant, en somme. Un joli clin d\'œil, histoire de faire perdurer la tradition.',
-        'height' => 52,
-        'weight' => 205,
-        'material' => 'cotton',
-        'location' => 'Alpes',
-        'stock' => 12,
-    ];
-
-    $bear3 = [
-        'id' => 3,
-        'name' => 'Phil Collins',
-        'price' => 72.99,
-        'photo' => 'collins.jpg',
-        'excerptDescription' => 'Chaleureux et soyeux',
-        'completeDescription' => 'Le nounours Phil Collins convient aux petits – pas trop petits non plus – et aux grands. Et il est spécialement conçu pour répondre aux mêmes besoins que lorsque vous étiez enfant. Tendresse, écoute, discrétion. Telles sont les trois missions de cet ours en peluche géant. Comme avant, en somme. Un joli clin d\'œil, histoire de faire perdurer la tradition.',
-        'height' => 47,
-        'weight' => 190,
-        'material' => 'cotton',
-        'location' => 'Pyrénées',
-        'stock' => 12,
-
-    ];
-
-
-    $productsList = array();
-    for ($i = 1; $i < 4; $i++) {
-        array_push($productsList, ${'bear' . $i});
-    }
-
-    return $productsList;
-}
-
-/* on génère notre div pour chaque produit sur la page d'accueil */
-
-function displayProducts()
-{
-    $products = myProducts();
-
-    foreach ($products as $product) { ?>
-        <section class="product col-md-3 text-center shadow p-3 mb-5 bg-white rounded">
-
-            <article class="product__nameandprice">
-                <h2 class="product__title">Ours <?= $product['name'] ?></h2>
-                <p><?= $product['price'] ?>€</p>
-                <img src="images/<?= $product['photo'] ?>" alt="Ours en peluche en <?= $product['material'] ?>">
-                <p><?= $product['excerptDescription'] ?></p>
-                <div class="form__container row d-flex justify-content-center">
-                    <form class="col-md-7 product__cta" action="product.php" method="POST">
-                        <input type="hidden" name="productId" value="<?= $product['id'] ?>">
-                        <input class="mt-3 btn btn-warning" type="submit" value="Je le découvre">
-                    </form>
-                    <form class="col-md-5 product__cta" action="cart.php" method="POST">
-                        <input type="hidden" name="productId" value="<?= $product['id'] ?>">
-                        <input class="mt-3 btn btn-warning" type="submit" value="Je l'adopte">
-                    </form>
-                </div>
-            </article>
-
-        </section>
-    <?php }
-}
+$pdo = new PDO($dsn, $user, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
 /* on génère notre div spécifique à un produit sur la page du produit */
 function singleProductPage($product)
@@ -275,6 +192,12 @@ function totalAmount()
 function deleteCart()
 {
     $_SESSION['cart'] = array();
+}
+
+/* fonction permettant d'afficher les erreurs avec un formatage */
+
+function debug($variable){
+    echo '<pre>' . var_dump($variable) . '</pre>';
 }
 
 ?>
