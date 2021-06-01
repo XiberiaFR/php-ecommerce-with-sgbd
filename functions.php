@@ -9,42 +9,19 @@ $pdo = new PDO($dsn, $user, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SE
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-/* on génère notre div spécifique à un produit sur la page du produit */
-function singleProductPage($product)
-{ ?>
-
-    <section class=" mb-5 vh-100 headersection d-flex justify-content-evenly align-items-center flex-column">
-        <h1 class="headersection__title"><?= $product['name'] ?>, l'ours des <?= $product['location'] ?></h1>
-        <a href="#theproduct" class="btn btn-warning">Je le personnalise</a>
-    </section>
-
-    </header>
-    <main class="productpage row mt-3" id="theproduct">
-        <section class="product productpage__photo col-md-6">
-            <img class="" src="images/<?= $product['photo'] ?>" alt="Ours en peluche en <?= $product['material'] ?>">
-        </section>
-
-        <section class="productpage__details col-md-6">
-            <h2 class="productpage__subtitle"><?= $product['name'] ?>, l'ours des <?= $product['location'] ?><br></h2>
-            <p class="productpage__price"><span>Prix</span><br><?= $product['price'] ?>€</p>
-
-            <p class="productpage__description"><span>Description</span><br><?= $product['completeDescription'] ?></p>
-            <p class="productpage__description"><span>Taille : </span><?= $product['height'] ?></p>
-            <p class="productpage__description"><span>Poids : </span><?= $product['weight'] ?></p>
-            <p class="productpage__description"><span>Texture : </span><?= $product['material'] ?></p>
-            <form class="col-md-5 product__cta" action="cart.php" method="POST">
-                <input type="hidden" name="productId" value="<?= $product['id'] ?>">
-                <input class="mt-3 btn btn-warning" type="submit" value="Je l'adopte">
-            </form>
-        </section>
-    </main>
-    <?php }
+$queryproductlist = "SELECT * FROM articles";
+$productresult = $pdo->query($queryproductlist);
+$allarticles = array();
+while ($resultatstousarticles = $productresult->fetch()) {
+    $allarticles[] = $resultatstousarticles;
+}
 
 /* récuperation article selon son ID */
 
 function getArticleFromID($id)
 {
-    $products = myProducts();
+    global $allarticles;
+    $products = $allarticles;
     foreach ($products as $product) {
         if ($product['id'] == $id) {
             $selectedProduct = $product;
@@ -53,6 +30,37 @@ function getArticleFromID($id)
     }
     return $selectedProduct;
 }
+
+
+/* on génère notre div spécifique à un produit sur la page du produit */
+function singleProductPage($product)
+{ ?>
+
+    <section class=" mb-5 vh-100 headersection d-flex justify-content-evenly align-items-center flex-column">
+        <h1 class="headersection__title"><?= $product['nom'] ?></h1>
+        <a href="#theproduct" class="btn btn-warning">Je le personnalise</a>
+    </section>
+
+    </header>
+    <main class="productpage row mt-3" id="theproduct">
+        <section class="product productpage__photo col-md-6">
+            <img class="" src="images/<?= $product['image'] ?>" alt="Ours en peluche">
+        </section>
+
+        <section class="productpage__details col-md-6">
+            <h2 class="productpage__subtitle"><?= $product['nom'] ?><br></h2>
+            <p class="productpage__price"><span>Prix</span><br><?= $product['prix'] ?>€</p>
+
+            <p class="productpage__description"><span>Description</span><br><?= $product['description_detaillee'] ?></p>
+            <form class="col-md-5 product__cta" action="cart.php" method="POST">
+                <input type="hidden" name="productId" value="<?= $product['id'] ?>">
+                <input class="mt-3 btn btn-warning" type="submit" value="Je l'adopte">
+            </form>
+        </section>
+    </main>
+    <?php }
+
+
 
 /* création du panier dans la session, si le panier n'existe pas car $_SESSION['cart'] retourne NULL alors on créé le panier */
 
@@ -93,9 +101,9 @@ function cartPage($pageName)
     $itemInCart = $_SESSION['cart'];
     foreach ($itemInCart as $itemToDisplay) { ?>
         <div class="col-md-12 product itemsinbasket__details d-flex align-items-center mb-3 text-center shadow p-3 mb-5 bg-white rounded">
-            <img class="col-md-2" src="images/<?= $itemToDisplay['photo'] ?>" alt="Ceci est un ours en peluche">
-            <p class="itemsinbasket__productname col-md-4"><?= $itemToDisplay['name'] ?></p>
-            <p class="itemsinbasket__price col-md-2"><?= $itemToDisplay['price'] ?>€ par ours</p>
+            <img class="col-md-2" src="images/<?= $itemToDisplay['image'] ?>" alt="Ceci est un ours en peluche">
+            <p class="itemsinbasket__productname col-md-4"><?= $itemToDisplay['nom'] ?></p>
+            <p class="itemsinbasket__price col-md-2"><?= $itemToDisplay['prix'] ?>€ par ours</p>
             <div class="editProduct col-md-4">
                 <form class="row" action="<?= $pageName ?>" method="POST">
                     <input type="hidden" name="productIdUpdated" value="<?= $itemToDisplay['id'] ?>">
@@ -180,7 +188,7 @@ function totalAmount()
     if (isset($_SESSION['cart']) && count($_SESSION['cart']) > 0) {
 
         foreach ($_SESSION['cart'] as $product) {
-            $total += $product['quantity'] * $product['price'];
+            $total += $product['quantity'] * $product['prix'];
         }
         $total += deliveryPrice();
         echo $total . '€ TTC';
@@ -198,6 +206,18 @@ function deleteCart()
 
 function debug($variable){
     echo '<pre>' . var_dump($variable) . '</pre>';
+}
+
+function logged_only() {
+    if(!isset($_SESSION['auth'])) {
+        header('Location: connexion?=NOTOK.php');
+        exit();
+    }
+}
+
+function random_string($length) {
+    $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return substr(str_shuffle($chars), 0, $length);
 }
 
 ?>

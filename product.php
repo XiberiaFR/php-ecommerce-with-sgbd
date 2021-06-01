@@ -1,6 +1,11 @@
 <?php
-session_start();
-include('functions.php'); ?>
+include('functions.php'); 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+} 
+
+logged_only(); 
+?>
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -30,7 +35,14 @@ include('functions.php'); ?>
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="col-md-9 collapse navbar-collapse d-flex justify-content-end" id="monMenu">
-                    <ul class="navbar-nav d-flex justify-content-center align-items-center flex-row">
+                <ul class="navbar-nav d-flex justify-content-center align-items-center flex-row">
+                        <?php if (isset($_SESSION['auth'])) : ?>
+                            <li class="p-2 nav-item"><a class="nav-link" href="compte.php">Votre compte(<?= $_SESSION['auth']['prenom']." ".$_SESSION['auth']['nom']; ?>)</a></li>
+                            <li class="p-2 nav-item"><a class="nav-link" href="deconnexion.php">Se déconnecter</a></li>
+                        <?php else : ?>
+                            <li class="p-2 nav-item"><a class="nav-link" href="inscription.php">Inscription</a></li>
+                            <li class="p-2 nav-item"><a class="nav-link" href="connexion.php">Connexion</a></li>
+                        <?php endif; ?>
                         <li class="p-2 nav-item">
                             <a class="nav-link active" href="cart.php"><i class="navigation__icon fas fa-shopping-basket"></i>Panier</a>
                         </li>
