@@ -1,0 +1,5 @@
+formulaire trop large input OK
+modif adresse de la session pour affichage OK
+modif des infos clients nom prenom mail
+try catch inutile sur index.php OK
+deplacer fonction dans fichier functions.php

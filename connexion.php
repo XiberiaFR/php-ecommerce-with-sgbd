@@ -9,6 +9,29 @@ if(isset($_SESSION['auth'])) {
     header('location: compte?=OK.php');
 };
 
+
+
+
+
+if (!empty($_POST) && !empty($_POST['username']) && !empty($_POST['password'])) {
+    $query = $pdo->prepare('SELECT * FROM clients WHERE username = :username OR email = :username');
+    $query->execute(['username' => $_POST['username']]);
+    $user = $query->fetch();
+    if (password_verify($_POST['password'], $user['mot_de_passe'])) {
+        $_SESSION['auth'] = $user;
+        if ($_POST['remember']) {
+            $remember_token = random_string(250);
+            $pdo->prepare('UPDATE clients SET remember_token = ? WHERE id = ?')->execute([$remember_token, $user['id']]);
+            setcookie('remember', $user['id'] . '==' . $remember_token . sha1($user['id'] . 'arinfo'), time() + 60 * 60 * 24 * 31);
+        }
+        header('Location: compte?=OK.php');
+        exit();
+    } else { ?>
+        <button class="btn btn-warning">Identifiant ou mot de passe incorrect</button>
+<?php }
+}
+
+
 if (isset($_COOKIE['remember']) && !isset($_SESSION['auth'])) {
     $remember_token = $_COOKIE['remember'];
     $parts = explode('==', $remember_token);
@@ -31,26 +54,6 @@ if (isset($_COOKIE['remember']) && !isset($_SESSION['auth'])) {
     }
 }
 
-
-
-
-if (!empty($_POST) && !empty($_POST['username']) && !empty($_POST['password'])) {
-    $query = $pdo->prepare('SELECT * FROM clients WHERE username = :username OR email = :username');
-    $query->execute(['username' => $_POST['username']]);
-    $user = $query->fetch();
-    if (password_verify($_POST['password'], $user['mot_de_passe'])) {
-        $_SESSION['auth'] = $user;
-        if ($_POST['remember']) {
-            $remember_token = random_string(250);
-            $pdo->prepare('UPDATE clients SET remember_token = ? WHERE id = ?')->execute([$remember_token, $user['id']]);
-            setcookie('remember', $user['id'] . '==' . $remember_token . sha1($user['id'] . 'arinfo'), time() + 60 * 60 * 24 * 31);
-        }
-        header('Location: compte?=OK.php');
-        exit();
-    } else { ?>
-        <button class="btn btn-warning">Identifiant ou mot de passe incorrect</button>
-<?php }
-}
 
 if (strpos($_SERVER['REQUEST_URI'], 'NOTOK') !== false) {
     echo '<div class="mt-5 alert alert-success">Vous devez vous connecter pour accéder à cette page</div>';

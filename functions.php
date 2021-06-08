@@ -352,4 +352,13 @@ function displayDeliveryPriceOnOrderDetails($order) {
         echo "Dont 7 € de frais de port";
     }
 }
+
+function saveAddressEdited() {
+    if (isset($_POST['check'])) {
+        $adresse = $_POST['number'] . " " . $_POST['street'];
+        $query = $pdo->prepare('UPDATE adresses SET adresse = ?, code_postal = ?, ville = ? WHERE id_client = ?');
+        $query->execute([$adresse, $_POST['zipcode'], $_POST['city'], $user_id]);
+        echo "<script> alert(\"Votre adresse a bien été mise à jour\");</script>";
+    }
+}
 ?>

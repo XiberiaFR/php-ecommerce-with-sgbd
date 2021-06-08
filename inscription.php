@@ -113,7 +113,7 @@ if (!empty($_POST)) {
         </nav>
     </header>
 
-    <main class="mt-5 pt-5">
+    <main class="mt-5 pt-5 container d-flex flex-column align-items-center justify-content-center">
         <h1>S'inscrire</h1>
         <?php if (!empty($errors)) : ?>
             <div class="alert alert-danger">
@@ -125,59 +125,59 @@ if (!empty($_POST)) {
                 </ul>
             <?php endif; ?>
             </div>
-            <form action="" method="POST">
+            <form class="d-flex flex-wrap justify-content-center align-items-center" action="" method="POST">
 
-                <div class="form-group">
+                <div class="form-group col-md-5 m-3">
                     <label for="">Pseudo</label>
                     <input class="form-control" type="text" name="username" required>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group col-md-5 m-3">
                     <label for="">Prénom</label>
                     <input class="form-control" type="text" name="first_name" required>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group col-md-5 m-3">
                     <label for="">Nom</label>
                     <input class="form-control" type="text" name="family_name" required>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group col-md-5 m-3">
                     <label for="">Nom de rue</label>
                     <input type="text" class="form-control" name="street" minlength="2" maxlength="30" pattern="[A-Za-z -éàâêèç][^0-9]{2,30}" required>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group col-md-5 m-3">
                     <label for="">Numéro de rue</label>
                     <input type="text" class="form-control" name="number" minlength="1" maxlength="4" pattern="[0-9]{1,4}" required>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group col-md-5 m-3">
                     <label for="">Code postal</label>
                     <input type="text" class="form-control" name="zipcode" minlength="5" maxlength="5" pattern="[0-9]{5}" required>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group col-md-5 m-3">
                     <label for="">Ville</label>
                     <input type="text" class="form-control" name="city" minlength="2" maxlength="30" pattern="[A-Za-z -éàâêèç][^0-9]{2,30}" required>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group col-md-5 m-3">
                     <label for="">Email</label>
                     <input class="form-control" type="email" name="email" required>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group col-md-5 m-3">
                     <label for="">Mot de passe</label>
                     <input class="form-control" type="password" name="password" required>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group col-md-5 m-3">
                     <label for="">Confirmez votre mot de passe</label>
                     <input class="form-control" type="password" name="password_confirm" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary">M'inscrire</button>
+                <button type="submit" class="col-md-3 btn btn-primary mt-3">M'inscrire</button>
 
             </form>
     </main>

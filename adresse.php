@@ -6,17 +6,13 @@ if (session_status() === PHP_SESSION_NONE) {
 logged_only();
 
 $user_id = $_SESSION['auth']['id'];
+
+saveAddressEdited();
+
+
 $query = $pdo->prepare('SELECT * FROM adresses WHERE id_client = ?');
 $query->execute([$user_id]);
 $queryResult = $query->fetch();
-
-if (isset($_POST['check'])) {
-    $adresse = $_POST['number'] . " " . $_POST['street'];
-    $query = $pdo->prepare('UPDATE adresses SET adresse = ?, code_postal = ?, ville = ? WHERE id_client = ?');
-    $query->execute([$adresse, $_POST['zipcode'], $_POST['city'], $user_id]);
-    echo "<script> alert(\"Votre adresse a bien été mise à jour\");</script>";
-}
-
 
 
 ?>

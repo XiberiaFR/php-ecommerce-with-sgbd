@@ -10,18 +10,11 @@ $queryproductlist1 = "SELECT * FROM articles WHERE id_gamme = 1 ORDER BY RAND() 
 $queryproductlist2 = "SELECT * FROM articles WHERE id_gamme = 2 ORDER BY RAND() limit 1";
 $queryproductlist3 = "SELECT * FROM articles WHERE id_gamme = 3 ORDER BY RAND() limit 1";
 
-try {
-    $result1 = $pdo->query($queryproductlist1);
-    $result2 = $pdo->query($queryproductlist2);
-    $result3 = $pdo->query($queryproductlist3);
 
+$result1 = $pdo->query($queryproductlist1);
+$result2 = $pdo->query($queryproductlist2);
+$result3 = $pdo->query($queryproductlist3);
 
-    if ($result1 === false) {
-        die("Erreur");
-    }
-} catch (PDOException $e) {
-    echo $e->getMessage();
-}
 
 $tableauarticles = array();
 
@@ -60,7 +53,7 @@ while ($resultatsarticles = $result3->fetch(PDO::FETCH_ASSOC)) {
             <div class="container collapse navbar-collapse">
 
                 <div class="col-md-3 d-flex justify-content-center">
-                    <a class="navbar-brand" href="">Hold my bear</a>
+                    <a class="navbar-brand" href="./">Hold my bear</a>
                 </div>
 
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#monMenu" aria-controls="monMenu" aria-label="Menu pour mobile">
@@ -85,7 +78,10 @@ while ($resultatsarticles = $result3->fetch(PDO::FETCH_ASSOC)) {
 
         <section class="headersection vh-100 d-flex justify-content-evenly align-items-center flex-column">
             <h1 class="headersection__title">La boutique de l'ours en peluche</h1>
-            <a href="#main" class="btn btn-warning">J'achète mon ours</a>
+            <div>
+                <a href="#main" class="btn btn-warning">Je veux voir des ours</a>
+                <a href="gamme.php" class="btn btn-success">Je découvre toutes les gammes</a>
+            </div>
         </section>
 
     </header>
