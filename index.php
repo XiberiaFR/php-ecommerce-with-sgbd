@@ -1,7 +1,8 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
-}include('functions.php');
+}
+include('functions.php');
 if (!empty($_POST['reset'])) {
     deleteCart();
 }
@@ -66,9 +67,9 @@ while ($resultatsarticles = $result3->fetch(PDO::FETCH_ASSOC)) {
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="col-md-9 collapse navbar-collapse d-flex justify-content-end" id="monMenu">
-                <ul class="navbar-nav d-flex justify-content-center align-items-center flex-row">
+                    <ul class="navbar-nav d-flex justify-content-center align-items-center flex-row">
                         <?php if (isset($_SESSION['auth'])) : ?>
-                            <li class="p-2 nav-item"><a class="nav-link" href="compte.php">Votre compte(<?= $_SESSION['auth']['prenom']." ".$_SESSION['auth']['nom']; ?>)</a></li>
+                            <li class="p-2 nav-item"><a class="nav-link" href="compte.php">Votre compte(<?= $_SESSION['auth']['prenom'] . " " . $_SESSION['auth']['nom']; ?>)</a></li>
                             <li class="p-2 nav-item"><a class="nav-link" href="deconnexion.php">Se déconnecter</a></li>
                         <?php else : ?>
                             <li class="p-2 nav-item"><a class="nav-link" href="inscription.php">Inscription</a></li>
@@ -110,6 +111,7 @@ while ($resultatsarticles = $result3->fetch(PDO::FETCH_ASSOC)) {
                                 <input type="hidden" name="productId" value="<?= $product['id'] ?>">
                                 <input class="mt-3 btn btn-warning" type="submit" value="Je l'adopte">
                             </form>
+                            <?php displayStock($product) ?>
                         </div>
                     </article>
 

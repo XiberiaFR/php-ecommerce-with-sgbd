@@ -5,13 +5,18 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 logged_only();
 
-if (strpos($_SERVER['REQUEST_URI'], 'OK') !== false) {
-    echo '<div class="mt-5 pt-5 alert alert-success">Félicitations, vous êtes maintenant connecté</div>';
+$user_id = $_SESSION['auth']['id'];
+$query = $pdo->prepare('SELECT * FROM adresses WHERE id_client = ?');
+$query->execute([$user_id]);
+$queryResult = $query->fetch();
+
+if (isset($_POST['check'])) {
+    $adresse = $_POST['number'] . " " . $_POST['street'];
+    $query = $pdo->prepare('UPDATE adresses SET adresse = ?, code_postal = ?, ville = ? WHERE id_client = ?');
+    $query->execute([$adresse, $_POST['zipcode'], $_POST['city'], $user_id]);
+    echo "<script> alert(\"Votre adresse a bien été mise à jour\");</script>";
 }
 
-$queryOrder = $pdo->prepare("SELECT * FROM commandes WHERE id_client = ? ORDER BY date_commande DESC");
-$queryOrder->execute([$_SESSION['auth']['id']]);
-$orderResult = $queryOrder->fetchAll();
 
 
 ?>
@@ -31,7 +36,7 @@ $orderResult = $queryOrder->fetchAll();
 
 <body>
 
-    <header class="container header">
+    <header class="container-fluid header">
 
         <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
             <div class="container collapse navbar-collapse">
@@ -60,46 +65,30 @@ $orderResult = $queryOrder->fetchAll();
             </div>
         </nav>
     </header>
-    <main class=" container mt-5 pt-5">
+    <main class="mt-5 pt-5">
         <h1>Bonjour <?= $_SESSION['auth']['prenom']; ?></h1>
-        <a href="password.php">(Modifier mon mot de passe)</a>
-        <br>
-        <a href="adresse.php">(Modifier mon adresse)</a>
 
+        <div class="text-center basketamount__userinformations col-md-12 bg-warning pt-2 pb-2 me-2 mb-3">
+            <p class="basketamount__userinformationstitle basketpage__title">Votre adresse actuelle</p>
+            <p><?= $queryResult['adresse'] . " - " . $queryResult['code_postal'] . " " . $queryResult['ville'] ?></p>
+        </div>
 
-        <section class="mt-5 container">
-            <table class="col-md-12 table table-hover">
+        <form action="" method="POST">
 
-                <thead>
-                    <tr>
-                        <th scope="col">Numéro</th>
-                        <th scope="col">Date</th>
-                        <th scope="col">Montant</th>
-                        <th scope="col">Détails</th>
-                    </tr>
-                </thead>
-                <?php foreach ($orderResult as $order) { ?>
+            <div class="text-center basketamount__userinformations col-md-12 bg-warning pt-2 pb-2 me-2 mb-3">
+                <p class="basketamount__userinformationstitle basketpage__title">Modification de votre adresse</p>
+                <input type="text" class="input-text" name="street" placeholder="Nom de rue" minlength="2" maxlength="30" pattern="[A-Za-z -éàâêèç][^0-9]{2,30}" required>
+                <input type="text" class="input-text" name="number" placeholder="Numéro de rue" minlength="1" maxlength="4" pattern="[0-9]{1,4}" required>
+                <input type="text" class="input-text" name="zipcode" placeholder="Code postal" minlength="5" maxlength="5" pattern="[0-9]{5}" required>
+                <input type="text" class="input-text" name="city" placeholder="Ville" minlength="2" maxlength="30" pattern="[A-Za-z -éàâêèç][^0-9]{2,30}" required>
+            </div>
 
-                    <tbody>
-                        <tr>
-                            <td><?= $order['numero'] ?></td>
-                            <td><?= $order['date_commande'] ?></td>
-                            <td><?= $order['prix'] ?>€</td>
-                            <td>
-                                <form action="commande.php" method="POST">
-                                    <input name="number" type="hidden" value="<?= $order['numero'] ?>">
-                                    <input name="id" type="hidden" value="<?= $order['id'] ?>">
-                                    <input class="btn btn-warning" type="submit" value="Détails">
-                                </form>
-                            </td>
+            <input type="hidden" name="check" value="true">
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-primary">Valider ma nouvelle adresse</button>
+            </div>
 
-                        </tr>
-                    </tbody>
-
-
-                <?php } ?>
-            </table>
-        </section>
+        </form>
     </main>
 
     <footer class="container-fluid footer p-4 bg-dark text-center text-white mt-5">

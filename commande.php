@@ -5,15 +5,13 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 logged_only();
 
-if (strpos($_SERVER['REQUEST_URI'], 'OK') !== false) {
-    echo '<div class="mt-5 pt-5 alert alert-success">Félicitations, vous êtes maintenant connecté</div>';
-}
+$queryOrderDetails = $pdo->prepare("SELECT * FROM commande_articles as ca INNER JOIN articles as ar ON ar.id = ca.id_article WHERE id_commande = ?");
+$queryOrderDetails->execute([($_POST['id'])]);
+$orderDetails = $queryOrderDetails->fetchAll();
 
-$queryOrder = $pdo->prepare("SELECT * FROM commandes WHERE id_client = ? ORDER BY date_commande DESC");
-$queryOrder->execute([$_SESSION['auth']['id']]);
-$orderResult = $queryOrder->fetchAll();
-
-
+$queryOrder = $pdo->prepare("SELECT * FROM commandes WHERE numero = ?");
+$queryOrder->execute([$_POST['number']]);
+$orderResult = $queryOrder->fetch();
 ?>
 
 <!DOCTYPE html>
@@ -62,36 +60,28 @@ $orderResult = $queryOrder->fetchAll();
     </header>
     <main class=" container mt-5 pt-5">
         <h1>Bonjour <?= $_SESSION['auth']['prenom']; ?></h1>
-        <a href="password.php">(Modifier mon mot de passe)</a>
-        <br>
-        <a href="adresse.php">(Modifier mon adresse)</a>
+        <h2 class="mt-5 text-center">Détails de votre commande numéro <?= $_POST['number'] ?></h2>
 
-
-        <section class="mt-5 container">
+        <section class="mt-5 container d-flex align-items-center flex-column">
             <table class="col-md-12 table table-hover">
 
                 <thead>
                     <tr>
-                        <th scope="col">Numéro</th>
-                        <th scope="col">Date</th>
+                        <th scope="col">Article</th>
+                        <th scope="col">Prix unitaire</th>
+                        <th scope="col">Quantité</th>
                         <th scope="col">Montant</th>
-                        <th scope="col">Détails</th>
                     </tr>
                 </thead>
-                <?php foreach ($orderResult as $order) { ?>
+                <?php foreach ($orderDetails as $order) { ?>
 
                     <tbody>
                         <tr>
-                            <td><?= $order['numero'] ?></td>
-                            <td><?= $order['date_commande'] ?></td>
+                            <td><?= $order['nom'] ?></td>
                             <td><?= $order['prix'] ?>€</td>
-                            <td>
-                                <form action="commande.php" method="POST">
-                                    <input name="number" type="hidden" value="<?= $order['numero'] ?>">
-                                    <input name="id" type="hidden" value="<?= $order['id'] ?>">
-                                    <input class="btn btn-warning" type="submit" value="Détails">
-                                </form>
-                            </td>
+                            <td><?= $order['quantite'] ?></td>
+                            <td><?php $amount = $order['prix'] * $order['quantite'];
+                                echo $amount . "€" ?></td>
 
                         </tr>
                     </tbody>
@@ -99,15 +89,13 @@ $orderResult = $queryOrder->fetchAll();
 
                 <?php } ?>
             </table>
+
+            <p class="mt-5 mb-3 text-center h5">Montant total de <?= $orderResult['prix'] ?>€ (<?php displayDeliveryPriceOnOrderDetails($orderDetails)?>)</p>
+            <a href="compte.php" class="text-center btn btn-warning">Retour à la liste des commandes</a>
+
         </section>
+
+
     </main>
 
-    <footer class="container-fluid footer p-4 bg-dark text-center text-white mt-5">
-        <h3 class="footer__h3">Hold my bear, la référence des ours en peluche made in France.</h3>
-    </footer>
-    <!-- Script pour chargement de fontawesome-->
-    <script src="https://kit.fontawesome.com/a4bf076c8c.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 </body>
-
-</html>

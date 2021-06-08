@@ -5,13 +5,31 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 logged_only();
 
-if (strpos($_SERVER['REQUEST_URI'], 'OK') !== false) {
-    echo '<div class="mt-5 pt-5 alert alert-success">Félicitations, vous êtes maintenant connecté</div>';
+
+if (isset($_POST['check'])) {
+    if (!empty($_POST['password_old']) && !empty($_POST['password']) && !empty($_POST['password_confirm'])) {
+
+        if ($_POST['password'] != $_POST['password_confirm']) {
+            echo "<script> alert(\"Les mots de passe ne correspondent pas\");</script>";
+        } else {
+            $query = $pdo->prepare('SELECT * FROM clients WHERE username = :username');
+            $query->execute(['username' => $_SESSION['auth']['username']]);
+            $user = $query->fetch();
+            $user_id = $_SESSION['auth']['id'];
+
+            if (password_verify($_POST['password_old'], $user['mot_de_passe'])) {
+                $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+                $pdo->prepare('UPDATE clients SET mot_de_passe = ? WHERE id = ?')->execute([$password, $user_id]);
+                echo "<script> alert(\"Votre mot de passe a bien été mis à jour\");</script>";
+            } else {
+                echo "<script> alert(\"Le mot de passe que vous venez de taper comme étant le mot de passe actuel ne correspond pas au mot de passe actuellement enregistré sur votre compte\");</script>";
+            }
+        }
+    } else {
+        echo "<script> alert(\"Un ou plusieurs champs vides\");</script>";
+    }
 }
 
-$queryOrder = $pdo->prepare("SELECT * FROM commandes WHERE id_client = ? ORDER BY date_commande DESC");
-$queryOrder->execute([$_SESSION['auth']['id']]);
-$orderResult = $queryOrder->fetchAll();
 
 
 ?>
@@ -31,7 +49,7 @@ $orderResult = $queryOrder->fetchAll();
 
 <body>
 
-    <header class="container header">
+    <header class="container-fluid header">
 
         <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
             <div class="container collapse navbar-collapse">
@@ -60,46 +78,28 @@ $orderResult = $queryOrder->fetchAll();
             </div>
         </nav>
     </header>
-    <main class=" container mt-5 pt-5">
+    <main class="mt-5 pt-5">
         <h1>Bonjour <?= $_SESSION['auth']['prenom']; ?></h1>
-        <a href="password.php">(Modifier mon mot de passe)</a>
-        <br>
-        <a href="adresse.php">(Modifier mon adresse)</a>
+
+        <form action="" method="POST">
+
+            <div class="from-group">
+                <input class="form-control" type="password" name="password_old" placeholder="Inscrivez votre mot de passe actuel">
+            </div>
+
+            <div class="from-group">
+                <input class="form-control" type="password" name="password" placeholder="Inscrivez votre nouveau mot de passe">
+            </div>
+
+            <div class="from-group">
+                <input class="form-control" type="password" name="password_confirm" placeholder="Confirmez votre nouveau mot de passe">
+            </div>
+
+            <input type="hidden" name="check" value="true">
+            <button class="btn btn-primary">Valider mon nouveau mot de passe</button>
 
 
-        <section class="mt-5 container">
-            <table class="col-md-12 table table-hover">
-
-                <thead>
-                    <tr>
-                        <th scope="col">Numéro</th>
-                        <th scope="col">Date</th>
-                        <th scope="col">Montant</th>
-                        <th scope="col">Détails</th>
-                    </tr>
-                </thead>
-                <?php foreach ($orderResult as $order) { ?>
-
-                    <tbody>
-                        <tr>
-                            <td><?= $order['numero'] ?></td>
-                            <td><?= $order['date_commande'] ?></td>
-                            <td><?= $order['prix'] ?>€</td>
-                            <td>
-                                <form action="commande.php" method="POST">
-                                    <input name="number" type="hidden" value="<?= $order['numero'] ?>">
-                                    <input name="id" type="hidden" value="<?= $order['id'] ?>">
-                                    <input class="btn btn-warning" type="submit" value="Détails">
-                                </form>
-                            </td>
-
-                        </tr>
-                    </tbody>
-
-
-                <?php } ?>
-            </table>
-        </section>
+        </form>
     </main>
 
     <footer class="container-fluid footer p-4 bg-dark text-center text-white mt-5">

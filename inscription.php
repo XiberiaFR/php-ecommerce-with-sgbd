@@ -21,12 +21,20 @@ if (!empty($_POST)) {
         }
     }
 
-    if (empty($_POST['first_name']) || !preg_match('/^[a-zA-Z]+$/', $_POST['first_name'])) {
-        $errors['first_name'] = "Le prénom est incorrect";
+    if (empty($_POST['street']) || !preg_match('/^[A-Za-z -éàâêèç][^0-9]{2,30}+$/', $_POST['street'])) {
+        $errors['street'] = "Nom de rue invalide";
     }
 
-    if (empty($_POST['family_name']) || !preg_match('/^[a-zA-Z]+$/', $_POST['family_name'])) {
-        $errors['family_name'] = "Le nom est incorrect";
+    if (empty($_POST['number']) || !preg_match('/^[0-9]{1,4}+$/', $_POST['number'])) {
+        $errors['number'] = "Numéro de rue invalide";
+    }
+
+    if (empty($_POST['zipcode']) || !preg_match('/^[0-9]{5}+$/', $_POST['zipcode'])) {
+        $errors['zipcode'] = "Code postal invalide";
+    }
+
+    if (empty($_POST['city']) || !preg_match('/^[A-Za-z -éàâêèç][^0-9]{2,30}+$/', $_POST['city'])) {
+        $errors['city'] = "La ville est incorrecte";
     }
 
     if (empty($_POST['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
@@ -48,6 +56,10 @@ if (!empty($_POST)) {
         $query = $pdo->prepare("INSERT INTO clients SET username = ?, nom = ?, prenom = ?, email = ?, mot_de_passe = ?");
         $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
         $query->execute([$_POST['username'], $_POST['family_name'], $_POST['first_name'], $_POST['email'], $password]);
+        $clientId = $pdo->lastInsertId();
+        $query = $pdo->prepare("INSERT INTO adresses SET id_client = ?, adresse = ?, code_postal = ?, ville = ?");
+        $adresse = $_POST['number'] . " " . $_POST['street'];
+        $query->execute([$clientId, $adresse, $_POST['zipcode'], $_POST['city']]);
         die('Compte créé avec succès');
     }
 }
@@ -84,9 +96,9 @@ if (!empty($_POST)) {
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="col-md-9 collapse navbar-collapse d-flex justify-content-end" id="monMenu">
-                <ul class="navbar-nav d-flex justify-content-center align-items-center flex-row">
+                    <ul class="navbar-nav d-flex justify-content-center align-items-center flex-row">
                         <?php if (isset($_SESSION['auth'])) : ?>
-                            <li class="p-2 nav-item"><a class="nav-link" href="compte.php">Votre compte(<?= $_SESSION['auth']['prenom']." ".$_SESSION['auth']['nom']; ?>)</a></li>
+                            <li class="p-2 nav-item"><a class="nav-link" href="compte.php">Votre compte(<?= $_SESSION['auth']['prenom'] . " " . $_SESSION['auth']['nom']; ?>)</a></li>
                             <li class="p-2 nav-item"><a class="nav-link" href="deconnexion.php">Se déconnecter</a></li>
                         <?php else : ?>
                             <li class="p-2 nav-item"><a class="nav-link active" href="inscription.php">Inscription</a></li>
@@ -100,14 +112,14 @@ if (!empty($_POST)) {
             </div>
         </nav>
     </header>
-    
+
     <main class="mt-5 pt-5">
         <h1>S'inscrire</h1>
-        <?php if (!empty($errors)): ?>
+        <?php if (!empty($errors)) : ?>
             <div class="alert alert-danger">
                 <p>Le formulaire contient des erreurs.</p>
                 <ul>
-                    <?php foreach ($errors as $error): ?>
+                    <?php foreach ($errors as $error) : ?>
                         <li><?php echo $error; ?></li>
                     <?php endforeach; ?>
                 </ul>
@@ -128,6 +140,26 @@ if (!empty($_POST)) {
                 <div class="form-group">
                     <label for="">Nom</label>
                     <input class="form-control" type="text" name="family_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="">Nom de rue</label>
+                    <input type="text" class="form-control" name="street" minlength="2" maxlength="30" pattern="[A-Za-z -éàâêèç][^0-9]{2,30}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="">Numéro de rue</label>
+                    <input type="text" class="form-control" name="number" minlength="1" maxlength="4" pattern="[0-9]{1,4}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="">Code postal</label>
+                    <input type="text" class="form-control" name="zipcode" minlength="5" maxlength="5" pattern="[0-9]{5}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="">Ville</label>
+                    <input type="text" class="form-control" name="city" minlength="2" maxlength="30" pattern="[A-Za-z -éàâêèç][^0-9]{2,30}" required>
                 </div>
 
                 <div class="form-group">

@@ -54,7 +54,8 @@ function singleProductPage($product)
             <p class="productpage__description"><span>Description</span><br><?= $product['description_detaillee'] ?></p>
             <form class="col-md-5 product__cta" action="cart.php" method="POST">
                 <input type="hidden" name="productId" value="<?= $product['id'] ?>">
-                <input class="mt-3 btn btn-warning" type="submit" value="Je l'adopte">
+                <input class="mt-3 btn btn-warning col-md-12" type="submit" value="Je l'adopte">
+                <?php displayStock($product) ?>
             </form>
         </section>
     </main>
@@ -87,10 +88,13 @@ function addToCart($product)
             $productAlreadyAdded = true;
         }
     }
-    if ($productAlreadyAdded == false) {
+    if ($productAlreadyAdded == false && $product['stock'] !=0) {
         $product['quantity'] = 1;
         array_push($_SESSION['cart'], $product);
         echo '<script>alert("Cet ours a bien été ajouté à votre panier")</script>';
+    }
+    else {
+        echo '<script>alert("Cet ours est en rupture de stock")</script>';
     }
 }
 
@@ -118,7 +122,7 @@ function cartPage($pageName)
                 </form>
             </div>
         </div>
-<?php }
+    <?php }
 }
 
 
@@ -182,42 +186,170 @@ function deliveryPriceDisplay()
 
 /* calcul du prix total du panier */
 
-function totalAmount()
+function calculateAmount()
 {
     $total = 0;
     if (isset($_SESSION['cart']) && count($_SESSION['cart']) > 0) {
-
         foreach ($_SESSION['cart'] as $product) {
             $total += $product['quantity'] * $product['prix'];
         }
         $total += deliveryPrice();
-        echo $total . '€ TTC';
+        return $total;
+    }
+}
+
+
+/* affiche le prix total du panier */ 
+
+function displayTotalAmount()
+{
+    if (count($_SESSION['cart']) > 0) {
+        echo calculateAmount() . '€ TTC';
     } else {
         echo "Aucun ours n'est présent dans votre panier";
     }
 }
 
+
+/* Vide le panier */
+
 function deleteCart()
 {
     $_SESSION['cart'] = array();
+    header('Location: index.php');
+    exit();
 }
 
-/* fonction permettant d'afficher les erreurs avec un formatage */
+/* affiche les erreurs avec un formatage */
 
-function debug($variable){
+function debug($variable)
+{
     echo '<pre>' . var_dump($variable) . '</pre>';
 }
 
-function logged_only() {
-    if(!isset($_SESSION['auth'])) {
+
+/* restreint l'accès à une page aux personnes connectées */
+
+function logged_only()
+{
+    if (!isset($_SESSION['auth'])) {
         header('Location: connexion?=NOTOK.php');
         exit();
     }
 }
 
-function random_string($length) {
+/* génère une chaine aléatoire */
+
+function random_string($length)
+{
     $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     return substr(str_shuffle($chars), 0, $length);
 }
 
+/* enregistre l'adresse du client */
+
+function saveAddress()
+{
+    global $pdo;
+
+    if (empty($_POST['street']) || !preg_match('/^[A-Za-z -éàâêèç][^0-9]{2,30}+$/', $_POST['street'])) {
+        $errors['street'] = "Nom de rue invalide";
+    }
+
+    if (empty($_POST['number']) || !preg_match('/^[0-9]{1,4}+$/', $_POST['number'])) {
+        $errors['number'] = "Numéro de rue invalide";
+    }
+
+    if (empty($_POST['zipcode']) || !preg_match('/^[0-9]{5}+$/', $_POST['zipcode'])) {
+        $errors['zipcode'] = "Code postal invalide";
+    }
+
+    if (empty($_POST['city']) || !preg_match('/^[A-Za-z -éàâêèç][^0-9]{2,30}+$/', $_POST['city'])) {
+        $errors['city'] = "La ville est incorrecte";
+    }
+
+    if (empty($errors)) {
+        $query = $pdo->prepare("INSERT INTO adresses SET id_client = ?, adresse = ?, code_postal = ?, ville = ?");
+        $adresse = $_POST['number'] . " " . $_POST['street'];
+        $query->execute([$_SESSION['auth']['id'], $adresse, $_POST['zipcode'], $_POST['city']]);
+    }
+}
+
+
+/* enregistre les informations de commande du client */
+
+function saveOrder()
+{
+
+    global $pdo;
+
+    $query = $pdo->prepare("INSERT INTO commandes SET id_client = ?, numero = ?, date_commande = ?, prix = ?");
+    $orderNumber = rand(1111111, 9999999);
+    date_default_timezone_set('Europe/Paris');
+    $orderDate = date("d-m-Y") . " " . date("H:i");
+    $query->execute([$_SESSION['auth']['id'], $orderNumber, $orderDate, calculateAmount()]);
+}
+
+
+/* enregistre les produits présents dans la commande */
+
+function saveOrderProduct()
+{
+    global $pdo;
+    $orderNumber = $pdo->lastInsertId();
+    foreach ($_SESSION['cart'] as $product) {
+        $productId = $product['id'];
+        $productQuantity = $product['quantity'];
+        $query = $pdo->prepare("INSERT INTO commande_articles SET id_article = ?, id_commande = ?, quantite = ?");
+        $query->execute([$productId, $orderNumber, $productQuantity]);
+        decreaseStock($product['stock'], $product['id'], $product['quantity']);
+    }
+}
+
+
+/* actualise le stock après une commande */
+
+function decreaseStock($stock, $id, $productQuantity)
+{
+    global $pdo;
+
+    $newProductQuantity = $stock - $productQuantity;
+    $query = $pdo->prepare("UPDATE articles SET stock = ? WHERE id = ?");
+    $query->execute([$newProductQuantity, $id]);
+}
+
+
+/* affiche le stock d'un produit */
+
+function displayStock($product)
+{
+    if ($product['stock'] == 0) { ?>
+        <div class="mt-4 alert alert-danger" role="alert">
+            Rupture de stock
+        </div>
+    <?php } else if ($product['stock'] > 10) { ?>
+        <div class="mt-4 alert alert-success" role="alert">
+            En stock
+        </div>
+    <?php } else { ?>
+        <div class="mt-4 alert alert-warning" role="alert">
+            Plus que <?= $product['stock']?> ours en stock
+        </div>
+<?php
+    }
+}
+
+/* affiche le montant des frais de port sur la page de détail d'une commande */
+
+function displayDeliveryPriceOnOrderDetails($order) {
+    $quantity = 0;
+    foreach($order as $myOrder) {
+        $quantity += $myOrder['quantite'];
+    }
+    if ($quantity > 2) {
+        echo "Frais de port offerts";
+    } else {
+        echo "Dont 7 € de frais de port";
+    }
+}
 ?>

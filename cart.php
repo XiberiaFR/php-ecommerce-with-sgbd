@@ -50,9 +50,9 @@ if (isset($_POST['deleteProduct'])) {
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="col-md-9 collapse navbar-collapse d-flex justify-content-end" id="monMenu">
-                <ul class="navbar-nav d-flex justify-content-center align-items-center flex-row">
+                    <ul class="navbar-nav d-flex justify-content-center align-items-center flex-row">
                         <?php if (isset($_SESSION['auth'])) : ?>
-                            <li class="p-2 nav-item"><a class="nav-link" href="compte.php">Votre compte(<?= $_SESSION['auth']['prenom']." ".$_SESSION['auth']['nom']; ?>)</a></li>
+                            <li class="p-2 nav-item"><a class="nav-link" href="compte.php">Votre compte(<?= $_SESSION['auth']['prenom'] . " " . $_SESSION['auth']['nom']; ?>)</a></li>
                             <li class="p-2 nav-item"><a class="nav-link" href="deconnexion.php">Se déconnecter</a></li>
                         <?php else : ?>
                             <li class="p-2 nav-item"><a class="nav-link" href="inscription.php">Inscription</a></li>
@@ -75,64 +75,27 @@ if (isset($_POST['deleteProduct'])) {
 
 
     <main class="mt-5 pt-5 basketpage container" id="main">
-        <section class="itemsinbasket container mt-3">
+        <section class="itemsinbasket row mt-3">
             <?php if (isset($_SESSION['cart']) && count($_SESSION['cart']) > 0) { ?>
                 <?php cartPage($pageName); ?>
-                <section class="basketamount row d-flex justify-content-stretch">
-                    <div class="basketamount__userinformations col-md-8 bg-warning pt-2 pb-2 me-2">
-                        <p class="basketamount__userinformationstitle basketpage__title border border-warning">Vos informations</p>
-                        <input type="text" class="input-text" placeholder="Nom de rue" minlength="2" maxlength="30" pattern="[A-Za-z -éàâêèç][^0-9]{2,30}" required>
-                        <input type="text" class="input-text" placeholder="Numéro de rue" minlength="1" maxlength="4" pattern="[0-9]{1,4}" required>
-                        <input type="text" class="input-text" placeholder="Code postal" minlength="5" maxlength="5" pattern="[0-9]{5}" required>
-                        <input type="text" class="input-text" placeholder="Ville" minlength="2" maxlength="30" pattern="[A-Za-z -éàâêèç][^0-9]{2,30}" required>
-                        <br><br />
-                        <input type="text" class="input-text" placeholder="Votre nom" minlength="2" maxlength="20" pattern="[A-Za-z -éàâêèç][^0-9]{2,20}" required>
-                        <input type="text" class="input-text" placeholder="Votre prénom" minlength="2" maxlength="20" pattern="[A-Za-z -éàâêèç][^0-9]{2,20}" required>
-                        <input type="tel" class="input-text" placeholder="Numéro de téléphone" maxlength="10" pattern="[0-9]{2}[0-9]{2}[0-9]{2}[0-9]{2}[0-9]{2}" required>
-                        <input type="email" class="input-text" placeholder="Adresse mail" required>
-                    </div>
-                    <div class="basketamount__total col text-center border border-success d-flex flex-column justify-content-center">
-                        <p class="basketamount__totalprice">Montant des frais de port : <?php deliveryPriceDisplay(); ?></p>
-                        <p class="basketamount__totalprice">Total de votre commande : <?php totalAmount(); ?></p>
 
+                <div class="basketamount__total col text-center border border-success d-flex flex-column justify-content-center">
+                    
+                    <p class="basketamount__totalprice">Montant des frais de port : <?php deliveryPriceDisplay(); ?></p>
+                    <p class="basketamount__totalprice">Total de votre commande : <?php displayTotalAmount(); ?></p>
 
+                    <a class="basketamount__totalsubmit btn btn-success col-md-12" href="confirmation.php">
+                        Je continue le processus
+                    </a>
 
+                </div>
 
-                        <!-- Button trigger modal -->
-                        <button type="button" class="basketamount__totalsubmit btn btn-success col-md-12" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                            Je valide la commande
-                        </button>
-
-                        <!-- Modal -->
-                        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Confirmation de commande</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Félicitations, votre commande a été validée. Elle vous sera livrée d'ici le <?php echo date('d-m-Y', strtotime("+3 days"));; ?>
-                                    </div>
-                                    <div class="modal-footer">
-
-                                        <form action="./" method="POST">
-                                            <input type="submit" id="reset" name="reset" class="btn btn-primary btn-success" value="C'est compris">
-                                            <form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </section>
-            <?php } 
-            else {
+        </section>
+    <?php } else {
                 echo '<p class=\'text-center h3\'>Votre panier est vide</p>';
             } ?>
 
-        </section>
+    </section>
 
 
 
