@@ -1,1 +1,1 @@
-# sample-php-ecommerce
+# php-ecommerce-with-sgbd
